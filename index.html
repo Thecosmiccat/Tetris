@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tetris Game JS</title>
+    <style>
+        :root {
+            --bg: #060606;
+            --panel: #111111;
+            --panel-border: #232323;
+            --text: #f5f5f5;
+            --muted: #9a9a9a;
+            --accent: #2ce27d;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: radial-gradient(circle at top, #121212, var(--bg) 55%);
+            color: var(--text);
+            font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+            display: flex;
+            justify-content: center;
+        }
+
+        .app {
+            width: min(620px, 100%);
+            padding: 20px 16px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .header {
+            text-align: center;
+        }
+
+        .title {
+            margin: 0;
+            font-size: 30px;
+            letter-spacing: 3px;
+        }
+
+        .meta {
+            margin-top: 4px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .meta a {
+            color: var(--accent);
+        }
+
+        .game-wrap {
+            background: var(--panel);
+            border: 1px solid var(--panel-border);
+            border-radius: 12px;
+            padding: 12px;
+            box-shadow: 0 0 0 1px #000, 0 18px 30px rgba(0, 0, 0, 0.45);
+        }
+
+        .game-layout {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        canvas {
+            width: 100%;
+            max-width: 280px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+            border: 1px solid #2f2f2f;
+            border-radius: 8px;
+            background: #0d0d0d;
+        }
+
+        #tetris {
+            width: 250px;
+            max-width: none;
+        }
+
+        .next-wrap {
+            width: 120px;
+        }
+
+        .next-title {
+            margin: 0 0 8px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 12px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        #next {
+            width: 120px;
+            max-width: none;
+        }
+
+        @media (max-width: 380px) {
+            .game-layout {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        .scoreboard {
+            margin-top: 12px;
+            text-align: center;
+            font-size: 16px;
+            color: var(--muted);
+        }
+
+        #score {
+            color: var(--text);
+            font-weight: 700;
+            margin-left: 4px;
+        }
+
+        .controls {
+            margin-top: auto;
+            background: var(--panel);
+            border: 1px solid var(--panel-border);
+            border-radius: 12px;
+            padding: 12px;
+        }
+
+        .controls-title {
+            margin: 0 0 10px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 13px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .controls-help {
+            margin: 0 0 10px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        .control-btn {
+            border: 1px solid #2e2e2e;
+            background: #171717;
+            color: var(--text);
+            padding: 10px 8px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .control-btn:active {
+            transform: translateY(1px);
+            background: #1f1f1f;
+        }
+
+        .win-overlay {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.82);
+            z-index: 999;
+        }
+
+        .win-overlay.show {
+            display: flex;
+        }
+
+        .win-card {
+            width: min(460px, 100%);
+            background: #111111;
+            border: 1px solid #2b2b2b;
+            border-radius: 14px;
+            padding: 22px 18px 16px;
+            text-align: center;
+            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5);
+        }
+
+        .win-title {
+            margin: 0;
+            font-size: 30px;
+            letter-spacing: 2px;
+            color: #2ce27d;
+        }
+
+        .win-text {
+            margin: 10px 0 16px;
+            color: var(--muted);
+            font-size: 15px;
+        }
+
+        .win-btn {
+            border: 1px solid #2d714a;
+            background: #1a5f3b;
+            color: #f5f5f5;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <section id="winOverlay" class="win-overlay" aria-hidden="true">
+        <div class="win-card">
+            <h2 class="win-title">YOU WIN</h2>
+            <p id="winMessage" class="win-text">Nice run. Press continue to keep playing.</p>
+            <button id="winContinue" class="win-btn" type="button">Continue</button>
+        </div>
+    </section>
+
+    <main class="app">
+        <header class="header">
+            <h1 class="title">TETRIS</h1>
+        </header>
+
+        <section class="game-wrap">
+            <div class="game-layout">
+                <canvas id="tetris" width="250" height="500"></canvas>
+                <aside class="next-wrap">
+                    <p class="next-title">Next</p>
+                    <canvas id="next" width="120" height="120"></canvas>
+                </aside>
+            </div>
+            <div class="scoreboard">Score: <span id="score">0</span></div>
+        </section>
+
+        <section class="controls">
+            <p class="controls-title">Controls</p>
+            <p class="controls-help">
+                Keyboard: A/Left = Left, D/Right = Right, S/Down = Down, W/Up/R = Rotate
+            </p>
+            <div class="controls-grid">
+                <button class="control-btn" data-action="left" type="button">Left (A)</button>
+                <button class="control-btn" data-action="rotate" type="button">Rotate (W)</button>
+                <button class="control-btn" data-action="right" type="button">Right (D)</button>
+                <button class="control-btn" data-action="down" type="button">Down (S)</button>
+            </div>
+        </section>
+    </main>
+    <script src="tetrominoes.js"></script>
+    <script src="tetris.js"></script>
+</body>
+</html>
