@@ -66,13 +66,14 @@ drawBoard();
 // the pieces and their colors
 
 const PIECES = [
-    [Z,"red"],
-    [S,"green"],
-    [T,"yellow"],
-    [O,"blue"],
-    [L,"purple"],
-    [I,"cyan"],
-    [J,"orange"]
+    [Z,"darkred"],
+    [S,"darkgreen"],
+    [T,"DarkKhaki"],
+    [O,"Darkslateblue"],
+    [L,"Darkmagenta"],
+    [I,"darkcyan"],
+    [J,"darkgoldenrod"],
+    [U,"Cadetblue"]
 ];
 const AMONG_US_PIECE = [AmongUs, "pink"];
 const SECRET_CODE = "sussybaka";
@@ -91,8 +92,12 @@ function randomPiece(){
         return new Piece(AMONG_US_PIECE[0], AMONG_US_PIECE[1]);
     }
 
-    let r = randomN = Math.floor(Math.random() * PIECES.length) // 0 -> 6
-    return new Piece( PIECES[r][0],PIECES[r][1]);
+    let r = Math.floor(Math.random() * PIECES.length);
+    let selected = PIECES[r];
+    if(!selected){
+        selected = PIECES[0];
+    }
+    return new Piece(selected[0], selected[1]);
 }
 
 let p = randomPiece();
@@ -371,6 +376,14 @@ function CONTROL(event){
             nextP = randomPiece();
             drawNextPiece();
             alert("Among Us mode enabled");
+            wait(2000); // Wait for 2 seconds before proceeding
+        }
+
+        if(amongUsMode && typedKeys.endsWith(SECRET_CODE)){
+            amongUsMode = false;
+            nextP = randomPiece();
+            drawNextPiece();
+            alert("Among Us mode disabled");
         }
 
         if(typedKeys.endsWith(WIN_CODE)){
